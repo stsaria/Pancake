@@ -4,8 +4,8 @@ import make
 import time
 import sys
 
-version = 0.4
-edition = "alpha".lower()
+version = 0.5
+edition = "beta".lower()
 
 def pancake():
     print("\nPancake\nVersion: ",str(version)+"-"+edition,"\n")

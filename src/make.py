@@ -5,7 +5,6 @@ import control
 import urllib
 import shutil
 import check
-import sys
 import os
 
 new_version = "1.19.3"
@@ -152,6 +151,9 @@ def input_server_info():
                             if not os.path.isfile(jar_installer_file):
                                 print("We don't have that file.")
                                 continue
+                            if not jar_installer_file.endswith(".jar"):
+                                print("The file is not a Jar file.")
+                                continue
                         except Exception as e:
                             check.except_print(e, "", False)
                             continue
@@ -165,6 +167,9 @@ def input_server_info():
                         try:
                             if not os.path.isfile(jar_start_file):
                                 print("We don't have that file.")
+                                continue
+                            if not jar_start_file.endswith(".jar"):
+                                print("The file is not a Jar file.")
                                 continue
                         except Exception as e:
                             check.except_print(e, "", False)
@@ -221,10 +226,12 @@ def run():
         month, day_of_week = setting_week_day_or_month(dt_now)
         
         if not local_jar_mode == 0:
+            
             if local_jar_mode == 1:
                 server_version = os.path.splitext(os.path.basename(jar_local_file))[0]
                 shutil.copy(jar_local_file, minecraft_dir)
                 jar_start_file = "server.jar"
+            
             if local_jar_mode == 2:
                 shutil.copy(jar_installer_file, minecraft_dir)
                 jar_start_file = jar_installer_file.replace('-installer', '')
