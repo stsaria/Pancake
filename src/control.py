@@ -1,6 +1,5 @@
 import subprocess
 import linecache
-import socket
 import check
 import make
 import sys
@@ -96,7 +95,7 @@ def make_sh():
     print("Created sh-bat file")
 
 def network_info():
-    network_info_select = etc_server.input_yes_no("\nAttention: please review before opening! \nThe information you are about to disclose is sensitive information, \nlike your IP address! (Like a phone number.) \nDepending on how you use this information, \nit could be used to attack your server. (like a phone number) \nThis information can be used to attack our servers, etc.,\ndepending on how it is used. \nPlease be aware of the circumstances and environment in which you disclose this information! \nDo you wish to disclose? \nPlease select with `yes` or `no`.\n[Y/N]: ")
+    network_info_select = make.input_yes_no("\nAttention: please review before opening! \nThe information you are about to disclose is sensitive information, \nlike your IP address! (Like a phone number.) \nDepending on how you use this information, \nit could be used to attack your server. (like a phone number) \nThis information can be used to attack our servers, etc.,\ndepending on how it is used. \nPlease be aware of the circumstances and environment in which you disclose this information! \nDo you wish to disclose? \nPlease select with `yes` or `no`.\n[Y/N]: ")
     if not network_info_select:
         return
     active, global_ip, private_ip = check.network("https://ifconfig.me")
