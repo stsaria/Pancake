@@ -26,6 +26,23 @@ def get_minecraft_new_version(version):
         else:
             return False, "not"
 
+def get_minecraft_new_version(version):
+    minecraft_server_donwload_page_url = "https://mcversions.net/download/"+str(version)
+    try:
+        res = requests.get(minecraft_server_donwload_page_url)
+        res.raise_for_status()
+    except Exception as e:
+        return False, str(res).replace('<Response [', '').replace(']>', '')
+    html = requests.get(minecraft_server_donwload_page_url)
+    soup = BeautifulSoup(html.content, "html.parser")
+    div = soup.find('div', 'downloads block lg:flex lg:mt-0 p-8 md:p-12 md:pr-0 lg:col-start-1')
+    if div:
+        minecraft_server_donwload_page_a = soup.find('a', 'text-xs whitespace-nowrap py-3 px-8 bg-green-700 hover:bg-green-900 rounded text-white no-underline font-bold transition-colors duration-200')
+        if minecraft_server_donwload_page_a:
+            return True, minecraft_server_donwload_page_a.get('href')
+        else:
+            return False, "not"
+
 def input_yes_no(text):
     while True:
         choice = input(text)
