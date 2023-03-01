@@ -4,7 +4,7 @@ import make
 import time
 import sys
 
-version = 0.6
+version = 0.7
 edition = "beta".lower()
 
 def pancake():

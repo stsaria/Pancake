@@ -1,5 +1,7 @@
 from urllib.request import Request, urlopen
+from bs4 import BeautifulSoup
 import linecache
+import requests
 import datetime
 import control
 import urllib
@@ -7,20 +9,22 @@ import shutil
 import check
 import os
 
-new_version = "1.19.3"
-
-minecraft_download_link_list = [
-    'https://launcher.mojang.com/v1/objects/1b557e7b033b583cd9f66746b7a9ab1ec1673ced/server.jar', #1.16.5
-    'https://launcher.mojang.com/v1/objects/0a269b5f2c5b93b1712d0f5dc43b6182b9ab254e/server.jar', #1.17
-    'https://launcher.mojang.com/v1/objects/a16d67e5807f57fc4e550299cf20226194497dc2/server.jar', #1.17.1
-    'https://launcher.mojang.com/v1/objects/3cf24a8694aca6267883b17d934efacc5e44440d/server.jar', #1.18
-    'https://launcher.mojang.com/v1/objects/125e5adf40c659fd3bce3e66e67a16bb49ecc1b9/server.jar', #1.18.1
-    'https://launcher.mojang.com/v1/objects/c8f83c5655308435b3dcf03c06d9fe8740a77469/server.jar', #1.18.2
-    'https://launcher.mojang.com/v1/objects/e00c4052dac1d59a1188b2aa9d5a87113aaf1122/server.jar', #1.19
-    'https://piston-data.mojang.com/v1/objects/8399e1211e95faa421c1507b322dbeae86d604df/server.jar', #1.19.1
-    'https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar', #1.19.2
-    'https://piston-data.mojang.com/v1/objects/c9df48efed58511cdd0213c56b9013a7b5c9ac1f/server.jar' #1.19.3
-]
+def get_minecraft_new_version(version):
+    minecraft_server_donwload_page_url = "https://mcversions.net/download/"+str(version)
+    try:
+        res = requests.get(minecraft_server_donwload_page_url)
+        res.raise_for_status()
+    except Exception as e:
+        return False, str(res).replace('<Response [', '').replace(']>', '')
+    html = requests.get(minecraft_server_donwload_page_url)
+    soup = BeautifulSoup(html.content, "html.parser")
+    div = soup.find('div', 'downloads block lg:flex lg:mt-0 p-8 md:p-12 md:pr-0 lg:col-start-1')
+    if div:
+        minecraft_server_donwload_page_a = soup.find('a', 'text-xs whitespace-nowrap py-3 px-8 bg-green-700 hover:bg-green-900 rounded text-white no-underline font-bold transition-colors duration-200')
+        if minecraft_server_donwload_page_a:
+            return True, minecraft_server_donwload_page_a.get('href')
+        else:
+            return False, "not"
 
 def input_yes_no(text):
     while True:
@@ -73,7 +77,7 @@ def download_text(url, file_name):
 # 特定の文字列の行を書き換える関数
 def replace_func(fname, replace_set):
     target, replace = replace_set
-
+    
     with open(fname, 'r') as f1:
         tmp_list =[]
         for row in f1:
@@ -91,34 +95,6 @@ def file_identification_rewriting(file_name, before, after):
     replace_setA = (before, after) # (検索する文字列, 置換後の文字列)
     # call func
     replace_func(file_name, replace_setA)
-
-def select_minecraft_version_line_conversion(input_version, new_version, output):
-    match input_version:
-        case "1.19.3": minecraft_server_link_lines = 9
-        case "1.19.2": minecraft_server_link_lines = 8
-        case "1.19.1": minecraft_server_link_lines = 7
-        case "1.19": minecraft_server_link_lines   = 6
-        case "1.18.2": minecraft_server_link_lines = 5
-        case "1.18.1": minecraft_server_link_lines = 4
-        case "1.18": minecraft_server_link_lines   = 3
-        case "1.17.1": minecraft_server_link_lines = 2
-        case "1.17": minecraft_server_link_lines   = 1
-        case "1.16.5": minecraft_server_link_lines = 0
-        case _:
-            while True:
-                if output:
-                    choice = input("\nThat version may not exist or may be written in double-byte, etc. \nBy default, "+new_version+" (latest) is applied. However, it is the responsible party \n(e.g. parent or server administrator) who decides this. If you have such an administrator, it would be preferable to follow his/her instructions\n[Y,N]: ").lower()
-                    if choice in ["yes", "ye", "y"]:
-                        return True, True, ""
-                    elif choice in ["no", "n"]:
-                        minecraft_server_link_lines = 9
-                        return True, False, minecraft_download_link_list[minecraft_server_link_lines]
-                    else:
-                        continue
-                # outputがFalse(エラーが表示されない)引数で呼び出したときの処理
-                elif not output:
-                    return True
-    return False, False, minecraft_download_link_list[minecraft_server_link_lines]
 
 # サーバー情報入力関数 
 def input_server_info():
@@ -177,14 +153,16 @@ def input_server_info():
                         break
                 break
             break
-            choice = None
         
         elif choice in ["no", "n"]:
             jar_installer_file = None
             jar_start_file = None
             local_jar_mode = 0
-            version = input("Enter the server version. (The supported versions are 1.16.5 ~ 1.19x): ")
-            choice = None
+            while True:
+                version = input("Enter the server version: ")
+                if not get_minecraft_new_version(version)[0]:
+                    continue
+                break
             break
     while True:
         choice = input("If you want to create more than one, enter `plural`, if you want to create immediately, enter `add`. \n[P,A]: ")
@@ -239,24 +217,9 @@ def run():
                 control.exec_java(minecraft_dir, jar_installer_file, "1", "1", "--installServer")
         else:
             try:
-                while True:
-                    minecraft_jar_version = select_minecraft_version_line_conversion(server_version, new_version, True)
-                    # 入力したバージョンがcase内に存在しないとき（default）の処理
-                    if minecraft_jar_version[1]:
-                        while True:
-                            server_version = input("Enter the server version: ")
-                            # ”再入力”したバージョンがcase内に存在するか確認する処理
-                            minecraft_jar_version = select_minecraft_version_line_conversion(server_version, new_version, False)
-                            # 入力したバージョンがcase内に存在しないとき（default）の処理
-                            if minecraft_jar_version[1]:
-                                continue
-                            # case内に存在するときの処理
-                            else:
-                                break
-                    else:
-                        break
+                print("Version "+server_version+" Download.")
                 # マイクラjarファイルダウンロード
-                download(minecraft_jar_version[2], minecraft_dir+"/server.jar")
+                download(get_minecraft_new_version(server_version)[1], minecraft_dir+"/server.jar")
                 jar_start_file = "server.jar"
             # ダウンロード時の例外処理
             except Exception as e:
@@ -284,7 +247,7 @@ def run():
         # サーバーディレクトリに管理用txtファイルを作成
         with open("data/"+minecraft_dir.replace('/', '-')+".txt", 'w', encoding="UTF-8") as f:
             print(server_version+"\n"+jar_start_file, file=f)
-         
+
     # Remove directory temp
     shutil.rmtree("tmp")
     print("\nServer make complete!\n")
