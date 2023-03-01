@@ -26,7 +26,7 @@ def network(url):
         global_ip = requests.get(str(url))
     except Exception as e:
         return False, e, None
-    return True, global_ip, private_ip
+    return True, global_ip.text, private_ip
 
 def run():
     print("File", end="...")
