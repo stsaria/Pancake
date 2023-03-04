@@ -54,4 +54,4 @@ def run():
         print("Error")
         print("Javaのパス（環境変数）が通っていません。")
         sys.exit(1)
-    print("OK")
+    print("OK!")
