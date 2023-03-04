@@ -5,11 +5,11 @@ import sys
 import os
 
 def except_print(except_text, text, stop):
-    print("An error (exception) occurred.\n",text)
+    print("エラー(例外)が発生しました\n",text)
     while True:
-        except_choice = input("\nShow Exceptions? \nYes[YES]\nNo[No]\n[Y/n]:").lower()
+        except_choice = input("\n例外を表示しますか？ \nはい[YES]\nいいえ[No]\n[Y/n]:").lower()
         if except_choice in ["yes", "ye", "y"]:
-            print("Error Details------\n",except_text)
+            print("詳細------\n",except_text)
             break
         if except_choice in ["no", "n"]:
             break
@@ -46,7 +46,7 @@ def run():
     network_result = network("https://ifconfig.me")
     if not network_result[0]:
         print("Error")
-        except_print(network_result[1], "There is a problem with the network.", True)
+        except_print(network_result[1], "ネットワークに問題があります。", True)
     print("OK")
     
     print("Java Path", end="...")

@@ -4,17 +4,17 @@ import make
 import time
 import sys
 
-version = 0.7
+version = 0.8
 edition = "beta".lower()
 
 def pancake():
     print("\nPancake\nVersion: ",str(version)+"-"+edition,"\n")
     if not edition == "release":
-        print("This program is in "+edition+" version")
-    print("\nPlease select a mode")
+        print("このプログラムは不安定版です。")
+    print("\nモードを選択してください。")
     
     while True:
-        mode = input("Make Server[Make]\nControl Server[Control]\nExit software[Exit]\n[M,C,E]: ").lower()
+        mode = input("作成モード[Make]\n管理モード[Control]\nソフトウェアを終了[Exit]\n[M,C,E]: ").lower()
         if mode in ["make", "mak", "ma", "m"]:
             make.run()
         if mode in ["control", "contro", "contr", "cont", "con", "co", "c"]:

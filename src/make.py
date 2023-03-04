@@ -26,23 +26,6 @@ def get_minecraft_new_version(version):
         else:
             return False, "not"
 
-def get_minecraft_new_version(version):
-    minecraft_server_donwload_page_url = "https://mcversions.net/download/"+str(version)
-    try:
-        res = requests.get(minecraft_server_donwload_page_url)
-        res.raise_for_status()
-    except Exception as e:
-        return False, str(res).replace('<Response [', '').replace(']>', '')
-    html = requests.get(minecraft_server_donwload_page_url)
-    soup = BeautifulSoup(html.content, "html.parser")
-    div = soup.find('div', 'downloads block lg:flex lg:mt-0 p-8 md:p-12 md:pr-0 lg:col-start-1')
-    if div:
-        minecraft_server_donwload_page_a = soup.find('a', 'text-xs whitespace-nowrap py-3 px-8 bg-green-700 hover:bg-green-900 rounded text-white no-underline font-bold transition-colors duration-200')
-        if minecraft_server_donwload_page_a:
-            return True, minecraft_server_donwload_page_a.get('href')
-        else:
-            return False, "not"
-
 def input_yes_no(text):
     while True:
         choice = input(text)
@@ -116,36 +99,36 @@ def file_identification_rewriting(file_name, before, after):
 # サーバー情報入力関数 
 def input_server_info():
     while True:
-        server_name = input("Please enter a server name: ")
+        server_name = input("新規サーバー名を入力してください: ")
         if server_name == "":
             continue
         break
     while True:
-        server_port = input("Please enter the port you wish to configure: ")
+        server_port = input("設定したいポートを入力してください: ")
         if not server_port.isdigit():
-            print("Not a number.")
+            print("数字ではありません。")
             continue
         if int(server_port) < 1 or int(server_port) > 49151:
-            print("These are unexpected numbers.")
+            print("予想外のポートです。")
             continue
         break
     while True:
-        choice = input("If you want to use the minecraft server for mods and plugins \n(mod: forge | plugin: spigot,papermc), choose `yes`(jar file), \nif not (download the official server), choose `no`.\n[Y,N]: ")
+        choice = input("もしあなたがマインクラフトサーバーでModやプラグイン \n(Mod: forge | プラグイン: spigotmc,papermc) を使いたい場合は`yes`を入力てください。 \nそうでない場合 (公式のサーバーをダウンロードする) は `no`を選択してください。\n[Y,N]: ").lower()
         if choice in ["yes", "ye", "y"]:
             version = None
             while True:
-                choice = input("If you want to put Forge on your server, please enter `yes`, \nif you want to put Jar files such as Spigot, Papermc, etc., please enter `no`.\n[Y,N]: ")
+                choice = input("Forgeを利用する場合は 'yes'を入力してください。\nSpigotmcやPapermcなどを利用する場合は `no`.\n[Y,N]: ").lower()
                 if choice in ["yes", "ye", "y"]:
                     local_jar_mode = 2
                     while True:
                         jar_start_file = None
-                        jar_installer_file = input("Enter the Jar file for the Forge installation. (e.g. C:/Users/user/Download/forge-installer.jar): ")
+                        jar_installer_file = input("Forgeのファイル名を入力してください。 (e.g. C:/Users/user/Download/forge-installer.jar): ")
                         try:
                             if not os.path.isfile(jar_installer_file):
-                                print("We don't have that file.")
+                                print("ファイルがありません。")
                                 continue
                             if not jar_installer_file.endswith(".jar"):
-                                print("The file is not a Jar file.")
+                                print("そのファイルはJarファイルではありません。")
                                 continue
                         except Exception as e:
                             check.except_print(e, "", False)
@@ -156,13 +139,13 @@ def input_server_info():
                     local_jar_mode = 1
                     while True:
                         jar_installer_file = None
-                        jar_start_file = input("Enter the Jar file you want to include. (e.g. C:/Users/user/Download/spigotmc.jar): ")
+                        jar_start_file = input("自分が持っているJarファイル名を入力してください。 (e.g. C:/Users/user/Download/spigotmc.jar): ")
                         try:
                             if not os.path.isfile(jar_start_file):
-                                print("We don't have that file.")
+                                print("ファイルがありません。")
                                 continue
                             if not jar_start_file.endswith(".jar"):
-                                print("The file is not a Jar file.")
+                                print("そのファイルはJarファイルではありません。")
                                 continue
                         except Exception as e:
                             check.except_print(e, "", False)
@@ -176,13 +159,13 @@ def input_server_info():
             jar_start_file = None
             local_jar_mode = 0
             while True:
-                version = input("Enter the server version: ")
+                version = input("サーバーのバージョンを入力してください: ")
                 if not get_minecraft_new_version(version)[0]:
                     continue
                 break
             break
     while True:
-        choice = input("If you want to create more than one, enter `plural`, if you want to create immediately, enter `add`. \n[P,A]: ")
+        choice = input("\nもし、もう一つ作成したい場合には `plural` と入力してください。\n今すぐ作成する場合には `add` と入力してください。 \n[P,A]: ")
         if choice in ["add", "ad", "a"]:
             return True, server_name, version, server_port, local_jar_mode, jar_installer_file, jar_start_file
         elif choice in ["plural", "plura", "plur", "plu", "pl", "p"]:
@@ -192,7 +175,7 @@ def run():
     print("Make Mode")
     server_count = 1
     while True:
-        print(str(server_count)+"st")
+        print(str(server_count)+"回目")
         server_add, server_name, server_version, server_port, local_jar_mode, jar_installer_file, jar_start_file = input_server_info()
         if not os.path.exists("tmp"):
             os.mkdir("tmp")
@@ -201,11 +184,11 @@ def run():
         if server_add:
             break
         server_count = server_count + 1
-    eula = input_yes_no("\nDo you agree to the EULA/Software License Agreement? \nPlease click here for more information about the EULA for ，Minecraft.\nhttps://www.minecraft.net/ja-jp/eula\nYes Please select with No. [Y/n]: ")
+    eula = input_yes_no("\nEULA/ソフトウェア利用許諾契約に同意しますか？ \nマインクラフトのEulaに関しては\nhttps://www.minecraft.net/ja-jp/eula\nをご覧ください\n 同意する場合は `yes` , 同意しない場合は `no` と入力してください。\n[Y/n]: ")
     
     for i in range(server_count):
         i = i + 1
-        print("Server being created ("+str(i)+"st)")
+        print("作成中 ("+str(i)+"回目)")
         
         dt_now = datetime.datetime.now()
         minecraft_dir = "minecraft/minecraft-"+dt_now.strftime('%Y-%m-%d-%H-%M-%S-%f')
@@ -234,7 +217,7 @@ def run():
                 control.exec_java(minecraft_dir, jar_installer_file, "1", "1", "--installServer")
         else:
             try:
-                print("Version "+server_version+" Download.")
+                print("Version "+server_version+" をダウンロードしています。")
                 # マイクラjarファイルダウンロード
                 download(get_minecraft_new_version(server_version)[1], minecraft_dir+"/server.jar")
                 jar_start_file = "server.jar"
@@ -267,4 +250,4 @@ def run():
 
     # Remove directory temp
     shutil.rmtree("tmp")
-    print("\nServer make complete!\n")
+    print("\nサーバーの作成が完了しました！\n")
